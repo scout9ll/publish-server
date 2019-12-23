@@ -14,6 +14,10 @@ const server = http.createServer(app)
 const io = socket.listen(server)
 const htmlPath = path.join(__dirname, '/static/index.html')
 const index = fs.readFileSync(htmlPath, 'utf8')
+app.use(function(req, res, next){
+  res.io = io;
+  next();
+});
 app.use(express.static('static'));
 app.use(bodyParser.json())
 app.use(cors());

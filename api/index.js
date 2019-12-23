@@ -29,15 +29,27 @@ router.get('/projectList', (req, res) => {
     .then(result => res.send(JSON.stringify(result)))
 })
 
+router.delete('/projectList/:name', (req, res) => {
+  const name = req.params.name
+  myDb.state.EbikePlatform.collection('project_config')
+    .deleteOne({ name: name })
+    .then(() => {
+      res.status(200).send('删除成功')
+    })
+    .catch(err => res.send(err))
+
+})
+
 router.post('/publish', (req, res) => {
   // req.body = JSON.parse(req.body)
-  console.log(req.body)
+  const data = {
+    time: Number(new Date()),
+    ...req.body
+  }
   myDb.state.EbikePlatform.collection('publish_snapshot')
-    .insertOne({
-      time: Number(new Date()),
-      ...req.body
-    })
+    .insertOne(data)
     .then(() => {
+      res.io.sockets.emit('newLog', data)
       res.status(201).send('构建完毕')
     })
     .catch(err => res.send(err))

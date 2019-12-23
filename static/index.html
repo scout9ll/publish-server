@@ -28,6 +28,11 @@
     .log-panel {
       grid-area: log;
     }
+    .live-log {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px;
+    }
     .snap-panel {
       grid-area: snap;
       padding: 20px;
@@ -75,7 +80,7 @@
   <div class="control" style="height: 20vh">
     <button>test</button>
     <button>pre</button>
-    <button>prod</button>
+    <button class="control__btn--prod">prod</button>
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script
@@ -101,13 +106,27 @@
     const title = document.querySelector(".branch-title");
     const snapInfo = document.querySelector(".snap-info");
     const envTitle = document.querySelector(".env-title");
-
+    const logPanel = document.querySelector(".log-panel");
     // socket
-    socket.on("currentBranch", data => {
-      title.innerText = data;
-    });
-    socket.on("buildingLog", data => {
+    // socket.on("currentBranch", data => {
+    //   title.innerText = data;
+    // });
+    socket.on("newLog", data => {
       console.log(data);
+      if (data.env == currentData[0].env) {
+        currentData.push(data);
+        generateTimeLineSets(currentData);
+        console.log(timeLineDataSets);
+        timeline.setSelection(data.time);
+      }
+      const liveLogEle = document.createElement("div");
+      liveLogEle.className = "live-log";
+      liveLogEle.innerHTML = `<span class='log-name'>${
+        data.projectName
+      }</span><span>${data.env} </span><span>${new Date(
+        data.time
+      ).toLocaleString()}</span>`;
+      logPanel.prepend(liveLogEle);
     });
     document
       .querySelectorAll(".control>button")
@@ -148,7 +167,7 @@
     };
     const TimeLineGroups = new vis.DataSet();
     let timeLineDataSets, currentData;
-    var timeline = new vis.Timeline(container, timeLineDataSets, options);
+    const timeline = new vis.Timeline(container, timeLineDataSets, options);
     timeline.on("select", function(properties) {
       const currentLog = currentData.find(
         item => item.time == properties.items[0]
@@ -166,7 +185,7 @@
       `;
     });
     generateTimeLineGroups();
-    document.querySelector(".control>button").click();
+    document.querySelector(".control__btn--prod").click();
 
     //function
 
