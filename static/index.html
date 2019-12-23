@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link
+      href="//unpkg.com/vis-timeline@latest/dist/vis-timeline-graph2d.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
+  <style>
+    main {
+      display: grid;
+      height: 70vh;
+      grid-template-columns: 3fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      grid-template-areas:
+        "graph snap "
+        "graph log ";
+    }
+    #visualization {
+      grid-area: graph;
+      /* overflow-y: scroll; */
+    }
+    .log-panel {
+      grid-area: log;
+    }
+    .snap-panel {
+      grid-area: snap;
+      padding: 20px;
+      border: #ffc200 10px solid;
+      background: #fff785;
+    }
+    .snap-title {
+      font-size: 16px;
+      text-align: center;
+    }
+    .snap-info {
+    }
+    .info-value {
+      font-style: italic;
+    }
+    .control {
+      height: 20vh;
+      width: 50vw;
+      display: flex;
+      justify-content: space-around;
+    }
+    button {
+      height: 30px;
+      width: 60px;
+    }
+  </style>
+  <body>
+    <header>
+      <div class="branch-title">
+        平台发版管理
+      </div>
+      <div class="env-title"></div>
+    </header>
+    <main>
+      <div id="visualization"></div>
+      <div class="snap-panel">
+        <div class="snap-title">
+          发版快照
+        </div>
+        <div class="snap-info"></div>
+      </div>
+      <div class="log-panel"></div>
+    </main>
+  </body>
+  <div class="control" style="height: 20vh">
+    <button>test</button>
+    <button>pre</button>
+    <button>prod</button>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script
+    type="text/javascript"
+    src="//unpkg.com/vis-timeline@latest/dist/vis-timeline-graph2d.min.js"
+  ></script>
+  <script
+    type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"
+  ></script>
+  <script
+    type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/echarts-stat/dist/ecStat.min.js"
+  ></script>
+  <script
+    type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/dataTool.min.js"
+  ></script>
+  <script>
+    const socket = io();
+    const container = document.getElementById("visualization");
+    // const myChart = echarts.init(container)
+    const title = document.querySelector(".branch-title");
+    const snapInfo = document.querySelector(".snap-info");
+    const envTitle = document.querySelector(".env-title");
+
+    // socket
+    socket.on("currentBranch", data => {
+      title.innerText = data;
+    });
+    socket.on("buildingLog", data => {
+      console.log(data);
+    });
+    document
+      .querySelectorAll(".control>button")
+      .forEach(ele =>
+        ele.addEventListener(
+          "click",
+          changeEnv(ele.innerText, generateTimeLineSets)
+        )
+      );
+
+    // init
+
+    const options = {
+      stack: true,
+      horizontalScroll: true,
+      zoomKey: "ctrlKey",
+      maxHeight: "100%",
+      verticalScroll: true,
+      // editable: true,
+      margin: {
+        item: 10, // minimal margin between items
+        axis: 5 // minimal margin between items and the axis
+      },
+      orientation: {
+        axis: "both",
+        item: "top"
+      },
+      tooltip: {
+        template: function(originalItemData, parsedItemData) {
+          var color = "green";
+          // console.log(originalItemData,parsedItemData)
+          return `<span style="color:${color}">${new Date(
+            parsedItemData.start
+          ).toLocaleString()}</span>`;
+        }
+      },
+      groupEditable: true
+    };
+    const TimeLineGroups = new vis.DataSet();
+    let timeLineDataSets, currentData;
+    var timeline = new vis.Timeline(container, timeLineDataSets, options);
+    timeline.on("select", function(properties) {
+      const currentLog = currentData.find(
+        item => item.time == properties.items[0]
+      );
+      if (!currentLog) {
+        return;
+      }
+      snapInfo.innerHTML = `<div><span class="info-label">项目名</span><span> ${currentLog.projectName}</span></div>
+      <div><span class="info-label">环境</span><span class="info-value"> ${currentLog.env}</span></div>
+      <div><span class="info-label">发版人</span><span class="info-value"> ${currentLog.publishUser}</span></div>
+      <div><span class="info-label">打包分支</span><span class="info-value"> ${currentLog.branch.name}</span></div>
+      <div><span class="info-label">提交ID</span><span class="info-value"> ${currentLog.branch.commitId}</span></div>
+      <div><span class="info-label">提交作者</span><span class="info-value"> ${currentLog.branch.commitAnthor}</span></div>
+      <div><span class="info-label">提交信息</span><span class="info-value"> ${currentLog.branch.commitDesc}</span></div>
+      `;
+    });
+    generateTimeLineGroups();
+    document.querySelector(".control>button").click();
+
+    //function
+
+    function changeEnv(env, CBK) {
+      return () =>
+        fetch("/platform/history", { method: "get" })
+          .then(res => {
+            if (res.ok) {
+              envTitle.innerHTML = env;
+              return res.json();
+            }
+          })
+          .then(data => data.filter(item => item.env == env))
+          .then(CBK);
+    }
+    function generateTimeLineGroups() {
+      fetch("/platform/projectList", { method: "get" })
+        .then(res => {
+          if (res.ok) {
+            return res.json();
+          }
+        })
+        .then(data => {
+          const names = data.map(item => item.name);
+          names.forEach((group, index) =>
+            TimeLineGroups.add({
+              content: group,
+              id: group,
+              value: index + 1
+            })
+          );
+          var options = {
+            groupOrder: "content" // groupOrder can be a property name or a sorting function
+          };
+          timeline.setGroups(TimeLineGroups);
+        });
+    }
+
+    function generateTimeLineSets(filterData) {
+      const sets = filterData.map(item => {
+        return {
+          id: item.time,
+          group: item.projectName,
+          content: item.branch.name,
+          type: "box",
+          start: item.time
+        };
+      });
+      console.log(sets);
+      currentData = filterData;
+      timeLineDataSets = new vis.DataSet(sets);
+      timeline.setItems(timeLineDataSets);
+      timeline.fit();
+    }
+    function generateBarChart(filterData) {
+      console.log(filterData);
+      const holdList = [];
+      // filterList.forEach(item=>{
+      //   const historyDiv = `<div><span>${item.projectName}</span><span>${item.branch.name}</span><span>${item.branch.time}</span> </div>`
+      //   historyPanel.push
+      // })
+      filterData.forEach(item => {
+        holdList.some(uniItem => item.projectName == uniItem.projectName)
+          ? ""
+          : holdList.push(item);
+      });
+      console.log(holdList);
+      const projectNameList = holdList.map(item => item.projectName);
+      const porjectTimeList = holdList.map(item => item.branch.time);
+      var app = {};
+      option = null;
+      option = {
+        xAxis: {
+          type: "category",
+          data: projectNameList,
+          axisLabel: { showMaxLabel: true, rotate: 60 },
+          nameRotate: 60,
+          nameGap: 5
+        },
+        yAxis: {
+          type: "time"
+        },
+        series: [
+          {
+            data: porjectTimeList,
+            type: "bar"
+          }
+        ]
+      };
+      if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+      }
+    }
+  </script>
+</html>
