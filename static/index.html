@@ -14,7 +14,7 @@
   <style>
     main {
       display: grid;
-      height: 70vh;
+      height: 90vh;
       grid-template-columns: 3fr 1fr;
       grid-template-rows: 1fr 1fr;
       grid-template-areas:
@@ -49,10 +49,13 @@
       font-style: italic;
     }
     .control {
-      height: 20vh;
-      width: 50vw;
+      position: absolute;
+      right: 10px;
+      height:100px;
+      width: 150px;
       display: flex;
       justify-content: space-around;
+      z-index: 99;
     }
     button {
       height: 30px;
@@ -67,7 +70,13 @@
       <div class="env-title"></div>
     </header>
     <main>
-      <div id="visualization"></div>
+      <div id="visualization">
+        <div class="control" style="height: 20vh">
+          <button>test</button>
+          <button>pre</button>
+          <button class="control__btn--prod">prod</button>
+        </div>
+      </div>
       <div class="snap-panel">
         <div class="snap-title">
           发版快照
@@ -77,28 +86,9 @@
       <div class="log-panel"></div>
     </main>
   </body>
-  <div class="control" style="height: 20vh">
-    <button>test</button>
-    <button>pre</button>
-    <button class="control__btn--prod">prod</button>
-  </div>
   <script src="/socket.io/socket.io.js"></script>
-  <script
-    type="text/javascript"
-    src="//unpkg.com/vis-timeline@latest/dist/vis-timeline-graph2d.min.js"
-  ></script>
-  <script
-    type="text/javascript"
-    src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"
-  ></script>
-  <script
-    type="text/javascript"
-    src="https://cdn.jsdelivr.net/npm/echarts-stat/dist/ecStat.min.js"
-  ></script>
-  <script
-    type="text/javascript"
-    src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/dataTool.min.js"
-  ></script>
+  <script src="./js/help.js"></script>
+  <script src="./js/vis-timeline.js"></script>
   <script>
     const socket = io();
     const container = document.getElementById("visualization");
@@ -166,7 +156,7 @@
       groupEditable: true
     };
     const TimeLineGroups = new vis.DataSet();
-    let timeLineDataSets, currentData;
+    let timeLineDataSets, currentData, projectData;
     const timeline = new vis.Timeline(container, timeLineDataSets, options);
     timeline.on("select", function(properties) {
       const currentLog = currentData.find(
@@ -175,7 +165,11 @@
       if (!currentLog) {
         return;
       }
-      snapInfo.innerHTML = `<div><span class="info-label">项目名</span><span> ${currentLog.projectName}</span></div>
+      const currentProjectConfig = projectData.find(
+        item => item.name == currentLog.projectName
+      );
+      const currentUrl = currentLog.env=='prod'?currentProjectConfig.URL:composeUnprodUrl(currentProjectConfig.ossConfig[currentLog.env])
+      snapInfo.innerHTML = `<div><span class="info-label">项目名</span><span class="info-name"><a href="${currentUrl}" target="_blank">${currentLog.projectName}</a></span></div>
       <div><span class="info-label">环境</span><span class="info-value"> ${currentLog.env}</span></div>
       <div><span class="info-label">发版人</span><span class="info-value"> ${currentLog.publishUser}</span></div>
       <div><span class="info-label">打包分支</span><span class="info-value"> ${currentLog.branch.name}</span></div>
@@ -191,7 +185,7 @@
 
     function changeEnv(env, CBK) {
       return () =>
-        fetch("/platform/history", { method: "get" })
+        fetch("/platform/publish", { method: "get" })
           .then(res => {
             if (res.ok) {
               envTitle.innerHTML = env;
@@ -209,6 +203,7 @@
           }
         })
         .then(data => {
+          projectData = data;
           const names = data.map(item => item.name);
           names.forEach((group, index) =>
             TimeLineGroups.add({
@@ -239,45 +234,6 @@
       timeLineDataSets = new vis.DataSet(sets);
       timeline.setItems(timeLineDataSets);
       timeline.fit();
-    }
-    function generateBarChart(filterData) {
-      console.log(filterData);
-      const holdList = [];
-      // filterList.forEach(item=>{
-      //   const historyDiv = `<div><span>${item.projectName}</span><span>${item.branch.name}</span><span>${item.branch.time}</span> </div>`
-      //   historyPanel.push
-      // })
-      filterData.forEach(item => {
-        holdList.some(uniItem => item.projectName == uniItem.projectName)
-          ? ""
-          : holdList.push(item);
-      });
-      console.log(holdList);
-      const projectNameList = holdList.map(item => item.projectName);
-      const porjectTimeList = holdList.map(item => item.branch.time);
-      var app = {};
-      option = null;
-      option = {
-        xAxis: {
-          type: "category",
-          data: projectNameList,
-          axisLabel: { showMaxLabel: true, rotate: 60 },
-          nameRotate: 60,
-          nameGap: 5
-        },
-        yAxis: {
-          type: "time"
-        },
-        series: [
-          {
-            data: porjectTimeList,
-            type: "bar"
-          }
-        ]
-      };
-      if (option && typeof option === "object") {
-        myChart.setOption(option, true);
-      }
     }
   </script>
 </html>
