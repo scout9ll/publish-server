@@ -1,7 +1,7 @@
 const mongodb = require('mongodb')
 const MongoClient = mongodb.MongoClient
 const uri =
-  'mongodb+srv://steve911:87955626@music-6epxh.mongodb.net/EbikePlatform?retryWrites=true&w=majority'
+  'mongodb://localhost:27017'
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 const dbName = 'EbikePlatform'
