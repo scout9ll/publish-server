@@ -2,7 +2,7 @@ const express = require("express");
 // const fs = require('fs')
 // const path = require('path')
 const router = express.Router();
-const myDb = require("./db");
+const myDb = require("../db/db");
 // myDb.connect(err => {
 //   if (err) {
 //     console.log(err)
@@ -11,53 +11,44 @@ const myDb = require("./db");
 //   }
 // })
 
-router.get("/projectConfig", (req, res) => {
-  myDb.state.EbikePlatform.collection("config")
-    .find({})
-    .toArray()
-    .then(result => res.send(JSON.stringify(result)));
-});
-
-router.post("/projectConfig", (req, res) => {
+router.post("/projectList", async (req, res) => {
   let data = req.body;
-  if (!Array.isArray(data)) {
-    data = [data];
+  try {
+    if (Array.isArray(data)) {
+      const allConfigs = await myDb.state.EbikePlatform.collection(
+        "project_config"
+      )
+        .find({})
+        .toArray();
+      const existedConfigIDs = allConfigs
+        .filter((config) => {
+          return data.some((resConfig) => resConfig.name == config.name);
+        })
+        .map((existedConfig) => {
+          return myDb.getObjectID(existedConfig._id);
+        });
+      await myDb.state.EbikePlatform.collection("project_config").deleteMany({
+        _id: { $in: existedConfigIDs },
+      });
+    }
+
+    myDb.state.EbikePlatform.collection("project_config")
+      .insertMany(data)
+      .then(() => {
+        res.status(201).send("添加成功");
+      });
+  } catch (err) {
+    console.log(err);
+
+    res.send(err);
   }
-  myDb.state.EbikePlatform.collection("config")
-    .insertMany(data)
-    .then(() => {
-      res.status(201).send("添加成功");
-    })
-    .catch(err => res.send(err));
-});
-
-router.patch("/projectConfig", (req, res) => {
-  const data = req.body;
-  const id = myDb.getObjectID(data._id);
-  delete data._id;
-  myDb.state.EbikePlatform.collection("config")
-    .updateOne({ _id: id }, { $set: data })
-    .then(() => {
-      res.status(201).send("修改成功");
-    })
-    .catch(err => res.send(err));
-});
-
-router.post("/projectList", (req, res) => {
-  const data = req.body;
-  myDb.state.EbikePlatform.collection("project_config")
-    .insertMany(data)
-    .then(() => {
-      res.status(201).send("添加成功");
-    })
-    .catch(err => res.send(err));
 });
 
 router.get("/projectList", (req, res) => {
   myDb.state.EbikePlatform.collection("project_config")
     .find({})
     .toArray()
-    .then(result => res.send(JSON.stringify(result)));
+    .then((result) => res.status(200).json(result));
 });
 router.delete("/projectList/:name", (req, res) => {
   const name = req.params.name;
@@ -66,7 +57,7 @@ router.delete("/projectList/:name", (req, res) => {
     .then(() => {
       res.status(200).send("删除成功");
     })
-    .catch(err => res.send(err));
+    .catch((err) => res.send(err));
 });
 
 router.patch("/projectList", (req, res) => {
@@ -78,7 +69,7 @@ router.patch("/projectList", (req, res) => {
     .then(() => {
       res.status(201).send("修改成功");
     })
-    .catch(err => res.send(err));
+    .catch((err) => res.send(err));
 });
 
 router.patch("/publish", (req, res) => {
@@ -88,16 +79,16 @@ router.patch("/publish", (req, res) => {
   myDb.state.EbikePlatform.collection("publish_snapshot")
     .updateOne({ _id }, { $set: data })
     .then(() => {
-      res.status(200).send("修改成功");
+      res.status(201).send("修改成功");
     })
-    .catch(err => res.send(err));
+    .catch((err) => res.send(err));
 });
 
 router.post("/publish", (req, res) => {
   // req.body = JSON.parse(req.body)
   const data = {
     time: Number(new Date()),
-    ...req.body
+    ...req.body,
   };
   myDb.state.EbikePlatform.collection("publish_snapshot")
     .insertOne(data)
@@ -105,14 +96,14 @@ router.post("/publish", (req, res) => {
       res.io.sockets.emit("newLog", data);
       res.status(201).send("构建完毕");
     })
-    .catch(err => res.send(err));
+    .catch((err) => res.send(err));
 });
 
 router.get("/publish", (req, res) => {
   myDb.state.EbikePlatform.collection("publish_snapshot")
     .find({})
     .toArray()
-    .then(result => res.send(JSON.stringify(result)));
+    .then((result) => res.status(200).json(result));
   // res.send(require('../mock/historyMock'))
 });
 

@@ -2,7 +2,7 @@ const http = require('http')
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors');
-const buildApi = require('./api/index.js')
+const buildApi = require('./router/platform.js')
 const fs = require('fs')
 const path = require('path')
 const chalk = require('chalk')
@@ -22,9 +22,9 @@ app.use(express.static('static'));
 app.use(bodyParser.json())
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use('/platform', buildApi)
+app.use('/xiaoan/platform', buildApi)
 
-io.on('connection', function(socket) {
+io.on('connection', function() {
   console.log('a user connected')
 })
 app.get('/', (req, res, next) => {

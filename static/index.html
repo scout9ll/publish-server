@@ -185,7 +185,7 @@
 
     function changeEnv(env, CBK) {
       return () =>
-        fetch("/platform/publish", { method: "get" })
+        fetch("xiaoan/platform/publish", { method: "get" })
           .then(res => {
             if (res.ok) {
               envTitle.innerHTML = env;
@@ -196,7 +196,7 @@
           .then(CBK);
     }
     function generateTimeLineGroups() {
-      fetch("/platform/projectList", { method: "get" })
+      fetch("xiaoan/platform/projectList", { method: "get" })
         .then(res => {
           if (res.ok) {
             return res.json();
