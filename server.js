@@ -12,7 +12,7 @@ const socket = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 const io = socket.listen(server,{
-  path:'/xiaoan/api'
+  path:'/xiaoan/ws'
 });
 const htmlPath = path.join(__dirname, "/static/xiaoan/index.html");
 const index = fs.readFileSync(htmlPath, "utf8");
