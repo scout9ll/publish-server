@@ -11,7 +11,9 @@ const socket = require("socket.io");
 // init
 const app = express();
 const server = http.createServer(app);
-const io = socket.listen(server);
+const io = socket.listen(server,{
+  path:'/xiaoan/api'
+});
 const htmlPath = path.join(__dirname, "/static/xiaoan/index.html");
 const index = fs.readFileSync(htmlPath, "utf8");
 app.use(function (req, res, next) {
@@ -45,6 +47,6 @@ app.get("/xiaoan", (req, res) => {
 server.listen(8795, () => {
   console.log(
     `App running at: `,
-    chalk.blue.underline("http://localhost:8795")
+    chalk.blue.underline("http://localhost:8795/xiaoan/index.html")
   );
 });
