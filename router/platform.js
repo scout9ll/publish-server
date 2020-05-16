@@ -10,7 +10,6 @@ const myDb = require("../db/db");
 //     console.log('database connected')
 //   }
 // })
-
 router.post("/projectList", async (req, res) => {
   let data = req.body;
   try {
