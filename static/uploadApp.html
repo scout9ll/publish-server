@@ -15,7 +15,29 @@
     />
   </body>
   <script src="./js/app-info-parser.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
+
+    /**
+     * feat
+     * 包分布上传
+     * 包集中测试
+     * 包集中分发
+     * 包集中通知
+     * 
+     * */
+    // https://feichi-app.oss-cn-hangzhou.aliyuncs.com/detecttool/DetectTool-feichi-v2.1.4-release.apk
+    // https://feichi-app.oss-cn-hangzhou.aliyuncs.com/app/feichi_v2.1.9_release_normal_02121751.apk
+
+
+    const baseURL = 'http://localhost:8795/'
+    const myAxios = axios.create({baseURL})
+    const getAllConfig = () =>{
+      return myAxios.get('xiaoan/platform/projectList').then(res=>{
+        console.log(res)
+      })
+    }
+    getAllConfig()
     document.getElementById("filepicker").addEventListener(
       "change",
       function (event) {
@@ -31,6 +53,15 @@
       },
       false
     );
+    function uploadAPk(file){
+      const checkedClient = file.webkitRelativePath.match(/apk\/(.*)\/release/)
+      if(!checkedClient){
+       return alert('please upload file with correct directory')
+      }
+      const clientName = checkedClient[1]
+
+      
+    }
     function apkFileParsr(file) {
       //   const files = document.getElementById("file-input").files;
       const parser = new AppInfoParser(file);
@@ -47,7 +78,7 @@
       filesArr
         .filter(
           (file) =>
-            file.type == apkType && file.name.split("-")[2] == "release.apk"
+            file.type == apkType && file.name.icludes('releases')
         )
         .forEach((file) => apkFileParsr(file));
     }
