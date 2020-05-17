@@ -45,7 +45,7 @@ router.post("/projectList", async (req, res) => {
 
 router.get("/projectList", (req, res) => {
   myDb.state.EbikePlatform.collection("project_config")
-    .find({})
+    .find({...req.query})
     .toArray()
     .then((result) => res.status(200).json(result));
 });
