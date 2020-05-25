@@ -3,7 +3,6 @@ const express = require("express");
 // const path = require('path')
 const router = express.Router();
 const {getObjectID,state} = require("../db/db");
-
 // myDb.connect(err => {
 //   if (err) {
 //     console.log(err)
@@ -16,7 +15,7 @@ router.post("/projectList", async (req, res) => {
   try {
     if (Array.isArray(data)) {
       const allConfigs = await state.EbikePlatform.collection(
-        "project_config"
+        "detectTool_app"
       )
         .find({})
         .toArray();
@@ -27,12 +26,12 @@ router.post("/projectList", async (req, res) => {
         .map((existedConfig) => {
           return getObjectID(existedConfig._id);
         });
-      await state.EbikePlatform.collection("project_config").deleteMany({
+      await state.EbikePlatform.collection("detectTool_app").deleteMany({
         _id: { $in: existedConfigIDs },
       });
     }
 
-    state.EbikePlatform.collection("project_config")
+    state.EbikePlatform.collection("detectTool_app")
       .insertMany(data)
       .then(() => {
         res.status(201).send("添加成功");
@@ -45,19 +44,14 @@ router.post("/projectList", async (req, res) => {
 });
 
 router.get("/projectList", (req, res) => {
-//   state.EbikePlatform.aggregate([
-//     {$match: { env: 'prod' }},
-//     {$group:{_id:"$projectName", logs:{$push:"$$ROOT"}}},
-//     {$project:{_id:1,log:{$slice:["$logs",-3]}}}
-//  ])
-  state.EbikePlatform.collection("project_config")
+  state.EbikePlatform.collection("detectTool_app")
     .find({...req.query})
     .toArray()
     .then((result) => res.status(200).json(result));
 });
 router.delete("/projectList/:name", (req, res) => {
   const name = req.params.name;
-  state.EbikePlatform.collection("project_config")
+  state.EbikePlatform.collection("detectTool_app")
     .deleteOne({ name: name })
     .then(() => {
       res.status(200).send("删除成功");
@@ -68,8 +62,9 @@ router.delete("/projectList/:name", (req, res) => {
 router.patch("/projectList", (req, res) => {
   const data = req.body;
   const id = getObjectID(data._id);
+  console.log(data);
   delete data._id;
-  state.EbikePlatform.collection("project_config")
+  state.EbikePlatform.collection("detectTool_app")
     .updateOne({ _id: id }, { $set: data })
     .then(() => {
       res.status(201).send("修改成功");
