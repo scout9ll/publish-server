@@ -45,11 +45,6 @@ router.post("/projectList", async (req, res) => {
 });
 
 router.get("/projectList", (req, res) => {
-//   state.EbikePlatform.aggregate([
-//     {$match: { env: 'prod' }},
-//     {$group:{_id:"$projectName", logs:{$push:"$$ROOT"}}},
-//     {$project:{_id:1,log:{$slice:["$logs",-3]}}}
-//  ])
   state.EbikePlatform.collection("project_config")
     .find({...req.query})
     .toArray()
@@ -105,6 +100,12 @@ router.post("/publish", (req, res) => {
 });
 
 router.get("/publish", (req, res) => {
+//   state.EbikePlatform.collection("publish_snapshot").aggregate([
+//     {$match: { env: 'prod' }},
+//     {$project:{_id:0}},
+//     {$group:{_id:"$projectName",logs:{$push:"$$ROOT"}}},
+//     {$project:{_id:0,logs:{$slice:["$logs",-3]},projectName:"$_id"}}
+//  ]).toArray().then((result) => res.status(200).json(result));
   state.EbikePlatform.collection("publish_snapshot")
     .find({})
     .toArray()
