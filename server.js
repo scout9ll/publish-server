@@ -2,7 +2,7 @@ const http = require("http");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const buildApi = require("./router");
+const buildApi = require("./routes");
 const fs = require("fs");
 const path = require("path");
 const chalk = require("chalk");
@@ -21,7 +21,7 @@ app.use(function (req, res, next) {
   next();
 });
 app.use(express.static("static"));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit:'50mb'}));
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 
