@@ -8,7 +8,7 @@ function generateMockData() {
   const env = ['test', 'pre', 'prod']
   const branchAddonbefore = ['release', 'pre', 'feature']
   const branchAddonafter = ['eewr', 'verft', 'dsfa', 'sdfsdf', 'qwe']
-  const projectNameList = ['qiyue', 'feichi', 'moka', 'bengniao', 'saikunpeng', 'xiaozhu', 'zhishen', 'ziyouxing', 'aixingzou', 'liangqi', 'haima', 'leqi', 'dianlv', 'qingsongqi', 'zoubei', 'sale', 'xiaoma', 'xiaoqi', 'xiaojiu', 'dianma', 'chengguo']
+  const projectNameList = ['a1','a2','a3','a4','a5','a6','a7','a8','a9']
   for (let n = 0; n < 100; n++) {
     mockData.push(
       {
