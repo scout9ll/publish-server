@@ -81,7 +81,7 @@ router.get("/publish", async (req, res) => {
     if(req.query.set){
        result = await mpSnapshot.getSnapshotDataSet();
     }else{
-      result = await mpSnapshot.getAllSnapshots();
+      result = await mpSnapshot.getAllSnapshots(req.query);
     }
     res.status(200).json(result);
   } catch (err) {

@@ -5,8 +5,8 @@ class ProjectConfig extends Model {
     super(collection);
   }
 
-  async getAllSnapshots() {
-    return this.collection.find().toArray();
+  async getAllSnapshots(query) {
+    return this.collection.find(query).toArray();
   }
 
   async postSnapshot(data) {

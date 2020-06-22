@@ -77,7 +77,7 @@ router.post("/publish-snapshot", async (req, res) => {
 
 router.get("/publish-snapshot", async (req, res) => {
   try {
-    const result = await mpSnapshot.getAllSnapshots();
+    const result = await mpSnapshot.getAllSnapshots(req.query);
     res.status(200).json(result);
   } catch (err) {
     res.send(err);
