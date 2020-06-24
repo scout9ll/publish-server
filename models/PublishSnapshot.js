@@ -6,7 +6,7 @@ class ProjectConfig extends Model {
   }
 
   async getAllSnapshots(query) {
-    return this.collection.find(query).toArray();
+    return this.collection.find(query).sort({ _id: -1 }).toArray();
   }
 
   async postSnapshot(data) {
