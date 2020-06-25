@@ -34,10 +34,8 @@ class ProjectConfig extends Model {
     return this.collection.deleteOne({ name });
   }
 
-  async patchConfig(match, data) {
-    return this.collection.updateOne(match, { $set: data });
+  async patchConfig(filter, data) {
+    return this.collection.updateOne(filter, { $set: data }, { upsert: true });
   }
-
-
 }
 module.exports = ProjectConfig;

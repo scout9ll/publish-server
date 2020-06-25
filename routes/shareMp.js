@@ -115,11 +115,11 @@ router.delete("/project-theme/:name", async (req, res) => {
 
 router.patch("/project-theme", async (req, res) => {
   const data = req.body;
-  const _id = getObjectID(data._id);
+  // const _id = getObjectID(data._id);
   delete data._id;
 
   try {
-    await mpTheme.patchConfig({ _id }, data);
+    await mpTheme.patchConfig({ name: data.name }, data);
     res.status(201).send("修改成功");
   } catch (err) {
     res.send(err);
