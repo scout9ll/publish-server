@@ -14,7 +14,10 @@ router.use("/shareMp", shareEbikeMpRouter);
 router.use("/detectTool", detectToolRouter);
 router.use("/", ossProxyRouter);
 
+// eslint-disable-next-line no-unused-vars
 router.use(async (err, req, res, next) => {
+
+  // **NOTE  handle error centrally 
   res.status(400).json({
     errCode: err.code,
     errmsg: err.errmsg,
