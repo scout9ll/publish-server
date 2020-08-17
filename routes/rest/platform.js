@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { getObjectID } = require("../db/db");
-const ProjectConfig = require("../models/ProjectConfig");
-const PublishSnapshot = require("../models/PublishSnapshot");
+const { getObjectID } = require("../../db/db");
+const ProjectConfig = require("../../models/ProjectConfig");
+const PublishSnapshot = require("../../models/PublishSnapshot");
 
 const platformConfig = new ProjectConfig("project_config");
 const mpSnapshot = new PublishSnapshot("publish_snapshot");
