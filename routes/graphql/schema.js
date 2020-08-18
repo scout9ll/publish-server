@@ -53,9 +53,9 @@ const typeDefs = `
 const resolvers = {
   Query: {
     fullConfig: async (root, args, context, info) => {
-      console.log(`Resolver called: fullConfig`,args);
+      console.log(`Resolver called: fullConfig`, args);
       const result = await configModel.getConfig(args);
-      console.log(result)
+      console.log(result);
       if (result[0]) return result[0];
     },
   },
@@ -63,8 +63,11 @@ const resolvers = {
     updateConfig: async (root, data, context, info) => {
       //   const _id = getObjectID(data._id);
       //   delete data._id;
-      const name = data.name;
-      const result = await configModel.patchConfig({ name }, data);
+      const configData = data.configData
+      console.log(`Resolver called: fullConfig`, data);
+
+      const name = configData.name;
+      const result = await configModel.patchConfig({ name }, configData);
       console.log(result);
     },
   },
