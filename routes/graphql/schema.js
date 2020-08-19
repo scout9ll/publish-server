@@ -7,21 +7,56 @@ const typeDefs = `
     type Query {
       fullConfig(name: String!): FullConfig
     }
+
     type FullConfig {
-      name:String!
+      name:String
       commonConfig: CommonConfig
       sjdConfig: SjdConfig
       appConfig: AppConfig
   
     }
+    
     type CommonConfig {
-        version: String!
+      companyName: String
+      appSimpleNameChinese:String
+      lcAppIdSjd: String
+      lcAppIdCx: String
+      lcAppKey: String
+      ThemeColor: String
+      hostUrl:String
+      aliResBitbucket: String
+      aliAppBitbucket: String
+      aliOssHostCity:String
+      aliOssKey:String
+      aliOssSecret:String
     }
+    
     type SjdConfig {
         version: String!
+        androidVersionCode: String
+        appNameChinese: String
+        andMapKey: String
+        iosMapKey: String
+        UM_KEY: String
+        JPUSH_APPKEY: String
+        BUILD_BRANCH:String
+        CREATE_BRANCH_NAME: String
     }
+
     type AppConfig {
         version: String!
+        andVersionCode: String
+        appNameChinese: String
+        andMapKey:String
+        iosMapKey: String
+        jsMapKey: String
+        UM_KEY: String
+        JPUSH_APPKEY: String
+        BUILD_BRANCH: String
+        CREATE_BRANCH_NAME: String
+        APPSTORE_APPID: String
+        TEAM_ID:String
+        WX_PAY_ID:String
     }
 
     type Mutation {
@@ -63,7 +98,7 @@ const resolvers = {
     updateConfig: async (root, data, context, info) => {
       //   const _id = getObjectID(data._id);
       //   delete data._id;
-      const configData = data.configData
+      const configData = data.configData;
       console.log(`Resolver called: fullConfig`, data);
 
       const name = configData.name;
