@@ -3,7 +3,7 @@ const router = express.Router();
 const { getObjectID } = require("../../db/db");
 const ProjectConfig = require("../../models/ProjectConfig");
 const PublishSnapshot = require("../../models/PublishSnapshot");
-
+const { postPublishLog:transPostPublishLog }  = require("../../trans/api")
 const platformConfig = new ProjectConfig("project_config");
 const mpSnapshot = new PublishSnapshot("publish_snapshot");
 
@@ -69,6 +69,7 @@ router.post("/publish", async (req, res, next) => {
   try {
     data.projectType = "platform";
     await mpSnapshot.postSnapshot(data);
+    await transPostPublishLog(data)
     res.io.sockets.emit("newLog", data);
     res.status(201).send("构建完毕");
   } catch (err) {

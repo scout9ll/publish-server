@@ -26,7 +26,7 @@ class ProjectConfig extends Model {
         {
           $project: {
             _id: 0,
-            logs: { $slice: ["$logs", -3] },
+            logs: { $slice: ["$logs", -10] },
             projectName: "$_id",
           },
         },
