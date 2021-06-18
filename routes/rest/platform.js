@@ -69,7 +69,9 @@ router.post("/publish", async (req, res, next) => {
   try {
     data.projectType = "platform";
     await mpSnapshot.postSnapshot(data);
-    await transPostPublishLog(data)
+    if(data.env == 'prod'){
+      await transPostPublishLog(data)
+    }
     res.io.sockets.emit("newLog", data);
     res.status(201).send("构建完毕");
   } catch (err) {
